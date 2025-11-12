@@ -1,38 +1,40 @@
+# Week 7. Secure Authentication System.
 import bcrypt
 import os
 
+# File to store user data
 USER_DATA_FILE = "users.txt"
 
-
+# Function convert password to hashed.
 def hash_password(plain_text_password):
-    password_bytes = plain_text_password.encode("utf-8")
-    salt = bcrypt.gensalt()
-    hashed = bcrypt.hashpw(password_bytes, salt)
+    password_bytes = plain_text_password.encode("utf-8")   #conver to bytes
+    salt = bcrypt.gensalt()                                #generate salt
+    hashed = bcrypt.hashpw(password_bytes, salt)           # hashes the password
     return hashed.decode("utf-8")                          # convert bytes to string
 
 
-
+# Function check if entered password matches the hashed password
 def verify_password(plain_text_password, hashed_password):
     return bcrypt.checkpw(
-        plain_text_password.encode("utf-8"),
-        hashed_password.encode("utf-8")
+        plain_text_password.encode("utf-8"),  #convert input data to bytes
+        hashed_password.encode("utf-8")       #convert stored hash to bytes
     )
 
 
-
+# Function check if the username already exists
 def user_exists(username):
-    if not os.path.exists(USER_DATA_FILE):
+    if not os.path.exists(USER_DATA_FILE):  # If the file doesn't exist
         return False
-    with open(USER_DATA_FILE, "r", encoding="utf-8") as f:
+    with open(USER_DATA_FILE, "r", encoding="utf-8") as f:  # check into the file
         for line in f:
             if not line.strip():
                 continue
-            stored_user = line.strip().split(",")[0]
+            stored_user = line.strip().split(",")[0]  # Get username
             if stored_user == username:
-                return True
+                return True  # If the match found
     return False
 
-
+# Function if username already exists
 def register_user(username, password):
     # check duplicate user
     if user_exists(username):
@@ -42,7 +44,7 @@ def register_user(username, password):
     # hash the password
     hashed = hash_password(password)
 
-    # append new user to file
+    # append new user and hashed password into file
     with open(USER_DATA_FILE, "a", encoding="utf-8") as f:
         f.write(f"{username},{hashed}\n")
 
@@ -50,25 +52,26 @@ def register_user(username, password):
     return True
 
 
+# Function which checks the password of the log in user
 def login_user(username, password):
     if not os.path.exists(USER_DATA_FILE):
         print("Error: No users registered yet.")
         return False
 
-    with open(USER_DATA_FILE, "r", encoding="utf-8") as f:
+    with open(USER_DATA_FILE, "r", encoding="utf-8") as f:  # open and read the file
         for line in f:
             if not line.strip():
                 continue
             stored_user, stored_hash = line.strip().split(",")
-            if stored_user == username:
-                if verify_password(password, stored_hash):
+            if stored_user == username:   # if username is found
+                if verify_password(password, stored_hash): #if password matches
                     print(f"Login Successful — Welcome, {username}!")
                     return True
                 else:
                     print("Error: Invalid password.")
                     return False
 
-    print("Error: Username not found.")
+    print("Error: Username not found.") #if there is no match
     return False
 
 
@@ -88,8 +91,8 @@ def validate_username(username):
     if not username:
         print("Error: Username cannot be empty.")
         return False
-    if " " in username or "," in username in username:
-        print("Error: Username cannot contain spaces or , .")
+    if (" " in username) or ("," in username):
+        print("Error: Username cannot contain spaces or commas.")
         return False
     if len(username) < 3:
         print("Error: Username must be at least 3 characters long.")
@@ -154,9 +157,9 @@ def main():
                 input("\nPress Enter to return main menu...")
         elif choice == "3":
                 # Exit
-                print("\nThank you for using Authentication System.")
-                print("Exiting...")
-                break
+            print("\nThank you for using Authentication System.")
+            print("Exiting...")
+            break
         else:
             print("Error: Invalid option. Please select 1, 2, or 3.")
 
